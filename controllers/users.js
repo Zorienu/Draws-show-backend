@@ -32,3 +32,27 @@ export const userRegister = async (req, res) => {
     res.status(500).json({ message: "Something went wrong" });
   }
 };
+
+export const userLogin = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const existingUser = await User.findOne({ email });
+
+    if (!existingUser)
+      return res.status(400).json({ message: "Email or password incorrect" });
+
+    const isCorrectPassword = await bcrypt.compare(password, existingUser.password);
+
+    if (!isCorrectPassword)
+      return res.status(400).json({ message: "Email or password incorrect" });
+
+    const token = jwt.sign({ email, id: existingUser._id }, "secret", {
+      expiresIn: "1h",
+    });
+
+    res.json(token);
+  } catch (error) {
+    res.status(500).json({ message: "Something went wrong" });
+  }
+};
