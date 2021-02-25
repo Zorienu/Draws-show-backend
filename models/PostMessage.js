@@ -9,7 +9,14 @@ const postSchema = mongoose.Schema({
   tags: [String],
   createdAt: { type: Date, default: Date.now },
   likes: { type: [String], default: [] },
-  comments: [{ type: String, default: [] }],
+  comments: [
+    {
+      comment: String,
+      author: String,
+      authorId: String,
+      createdAt: { type: Date, default: Date.now },
+    },
+  ],
 });
 
 export default mongoose.model("PostMessage", postSchema);

@@ -38,3 +38,17 @@ export const updatePost = async (req, res) => {
   const updatedPost = await PostMessage.findByIdAndUpdate(_id, postUpdate, { new: true });
   res.json(updatedPost);
 };
+
+export const addComment = async (req, res) => {
+  const { newComment } = req.body;
+  const { id: postId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(postId))
+    res.status(409).json({ message: "No post with that id" });
+
+  const post = await PostMessage.findById(postId);
+  post.comments.push(newComment);
+
+  const updatedPost = await PostMessage.findByIdAndUpdate(postId, post, { new: true });
+  res.json(updatedPost);
+};
