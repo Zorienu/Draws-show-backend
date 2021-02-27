@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 import PostMessage from "../models/PostMessage.js";
+import User from "../models/User.js";
 
 export const getPosts = async (req, res) => {
   try {
@@ -40,14 +41,18 @@ export const updatePost = async (req, res) => {
 };
 
 export const addComment = async (req, res) => {
-  const { newComment } = req.body;
+  const { comment } = req.body;
   const { id: postId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(postId))
     res.status(409).json({ message: "No post with that id" });
 
   const post = await PostMessage.findById(postId);
-  post.comments.push(newComment);
+  post.comments.push({
+    comment,
+    author: `${req.user.firstName} ${req.user.lastName}`,
+    authorId: req.user.id,
+  });
 
   const updatedPost = await PostMessage.findByIdAndUpdate(postId, post, { new: true });
   res.json(updatedPost);
