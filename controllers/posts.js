@@ -45,7 +45,7 @@ export const addComment = async (req, res) => {
   const { id: postId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(postId))
-    res.status(409).json({ message: "No post with that id" });
+    return res.status(409).json({ message: "No post with that id" });
 
   const post = await PostMessage.findById(postId);
   post.comments.push({
@@ -53,6 +53,24 @@ export const addComment = async (req, res) => {
     author: `${req.user.firstName} ${req.user.lastName}`,
     authorId: req.user.id,
   });
+
+  const updatedPost = await PostMessage.findByIdAndUpdate(postId, post, { new: true });
+  res.json(updatedPost);
+};
+
+export const likePost = async (req, res) => {
+  const { id: postId } = req.params;
+  const { id: userId } = req.user;
+
+  if (!mongoose.Types.ObjectId.isValid(postId))
+    return res.status(409).json({ message: "No post with that id" });
+
+  const post = await PostMessage.findById(postId);
+
+  const isLiked = post.likes.find((like) => like === userId);
+
+  if (isLiked) post.likes = post.likes.filter((like) => like !== userId);
+  else post.likes.push(userId);
 
   const updatedPost = await PostMessage.findByIdAndUpdate(postId, post, { new: true });
   res.json(updatedPost);
