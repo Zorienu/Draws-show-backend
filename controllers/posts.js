@@ -58,6 +58,23 @@ export const addComment = async (req, res) => {
   res.json(updatedPost);
 };
 
+export const deleteComment = async (req, res) => {
+  const { id: postId } = req.params;
+  const { commentId } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(postId))
+    return res.status(409).json({ message: "No post with that id" });
+
+  if (!mongoose.Types.ObjectId.isValid(commentId))
+    return res.status(409).json({ message: "No comment with that id" });
+
+  const post = await PostMessage.findById(postId);
+  post.comments = post.comments.filter((comment) => String(comment._id) !== commentId);
+
+  const updatedPost = await PostMessage.findByIdAndUpdate(postId, post, { new: true });
+  res.json(updatedPost);
+};
+
 export const likePost = async (req, res) => {
   const { id: postId } = req.params;
   const { id: userId } = req.user;
